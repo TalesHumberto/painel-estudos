@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel de Estudos</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 32px 16px;
+    background: #17181a;
+    background-image:
+      radial-gradient(circle at 50% 0%, #202226 0%, #131416 70%);
+    font-family: 'Bahnschrift', 'Segoe UI', -apple-system, system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+
+  .console {
+    width: 100%;
+    max-width: 900px;
+  }
+
+  .plate {
+    background: linear-gradient(180deg, #2b2d31 0%, #212226 100%);
+    border: 1px solid #3a3c41;
+    border-radius: 6px;
+    padding: 18px 24px;
+    margin-bottom: 24px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 6px 18px rgba(0,0,0,0.4);
+  }
+
+  .plate h1 {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: 4px;
+    color: #d8d5cc;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  .plate .sub {
+    margin: 6px 0 0;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #6f7178;
+    text-transform: uppercase;
+  }
+
+  .legend {
+    display: flex;
+    gap: 18px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #9a9ca3;
+    text-transform: uppercase;
+  }
+  .legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+  }
+
+  .add-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .add-bar input {
+    flex: 1;
+    background: #1c1d20;
+    border: 1px solid #3a3c41;
+    border-radius: 4px;
+    padding: 12px 14px;
+    color: #e5e3da;
+    font-size: 14px;
+    outline: none;
+    font-family: inherit;
+  }
+  .add-bar input::placeholder { color: #5c5e64; }
+  .add-bar input:focus { border-color: #6f7178; }
+
+  .add-bar button {
+    background: #2b2d31;
+    border: 1px solid #3a3c41;
+    border-radius: 4px;
+    color: #d8d5cc;
+    padding: 0 20px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: inherit;
+    font-weight: 600;
+  }
+  .add-bar button:hover { background: #34363b; }
+  .add-bar button:active { transform: scale(0.97); }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+  }
+
+  .cell {
+    position: relative;
+    background: linear-gradient(180deg, #2b2d31 0%, #202226 100%);
+    border: 1px solid #3a3c41;
+    border-radius: 8px;
+    padding: 18px 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.35);
+  }
+
+  .remove-btn {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #5c5e64;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .remove-btn:hover { color: #c94b3f; }
+
+  .lamp-btn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid #17181a;
+    cursor: pointer;
+    box-shadow:
+      0 0 0 2px #45474d,
+      inset 0 3px 6px rgba(0,0,0,0.5);
+    transition: box-shadow 0.15s ease, transform 0.1s ease;
+    padding: 0;
+  }
+  .lamp-btn:active { transform: scale(0.94); }
+
+  .lamp-btn.state-red {
+    background: radial-gradient(circle at 35% 30%, #ff6b5e 0%, #c9382c 55%, #7a1f18 100%);
+    box-shadow: 0 0 0 2px #45474d, 0 0 14px 2px rgba(226,75,74,0.55), inset 0 2px 4px rgba(255,255,255,0.25);
+  }
+  .lamp-btn.state-yellow {
+    background: radial-gradient(circle at 35% 30%, #ffe27a 0%, #e0a824 55%, #8a6110 100%);
+    box-shadow: 0 0 0 2px #45474d, 0 0 14px 2px rgba(240,190,60,0.55), inset 0 2px 4px rgba(255,255,255,0.25);
+  }
+  .lamp-btn.state-green {
+    background: radial-gradient(circle at 35% 30%, #86e08a 0%, #379943 55%, #1c5b23 100%);
+    box-shadow: 0 0 0 2px #45474d, 0 0 14px 2px rgba(90,190,90,0.5), inset 0 2px 4px rgba(255,255,255,0.25);
+  }
+
+  .label {
+    font-size: 12.5px;
+    color: #d8d5cc;
+    text-align: center;
+    letter-spacing: 0.3px;
+    line-height: 1.3;
+    word-break: break-word;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+  }
+
+  .status-tag {
+    font-size: 9.5px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+  .status-tag.state-red { background: rgba(226,75,74,0.15); color: #f0999a; }
+  .status-tag.state-yellow { background: rgba(240,190,60,0.15); color: #f0d38a; }
+  .status-tag.state-green { background: rgba(90,190,90,0.15); color: #9adf9e; }
+
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: #5c5e64;
+    font-size: 13px;
+    letter-spacing: 1px;
+  }
+
+  .footer-note {
+    margin-top: 20px;
+    font-size: 11px;
+    color: #5c5e64;
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+</style>
+</head>
+<body>
+  <div class="console">
+    <div class="plate">
+      <h1>Painel de estudos</h1>
+      <p class="sub">Clique na luz para avançar o status da matéria</p>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:#c9382c;"></span>Aguardando</div>
+        <div class="legend-item"><span class="legend-dot" style="background:#e0a824;"></span>Próximo</div>
+      </div>
+    </div>
+
+    <div class="add-bar">
+      <input type="text" id="subject-input" placeholder="Nome da matéria (ex: Redes de Computadores)" maxlength="40">
+      <button id="add-btn">Adicionar</button>
+    </div>
+
+    <div class="grid" id="grid"></div>
+    <p class="footer-note">O estado de cada matéria fica salvo automaticamente.</p>
+  </div>
+
+<script>
+  const SUBJECTS_KEY = 'painel_estudos:subjects';
+  const ACTIVE_INDEX_KEY = 'painel_estudos:activeIndex';
+
+  const STATE_LABELS = {
+    red: 'Aguardando',
+    yellow: 'Próximo',
+    green: 'Em andamento'
+  };
+
+  let subjects = [];
+  let activeIndex = 0;
+
+  const grid = document.getElementById('grid');
+  const input = document.getElementById('subject-input');
+  const addBtn = document.getElementById('add-btn');
+
+  function uid() {
+    return 's' + Date.now() + Math.floor(Math.random() * 1000);
+  }
+
+  function saveData() {
+    localStorage.setItem(SUBJECTS_KEY, JSON.stringify(subjects));
+    localStorage.setItem(ACTIVE_INDEX_KEY, String(activeIndex));
+  }
+
+  function loadData() {
+    try {
+      const savedSubjects = localStorage.getItem(SUBJECTS_KEY);
+      const savedIndex = localStorage.getItem(ACTIVE_INDEX_KEY);
+
+      subjects = savedSubjects ? JSON.parse(savedSubjects) : [];
+      activeIndex = savedIndex === null ? 0 : Number(savedIndex);
+
+      if (!Number.isInteger(activeIndex) || activeIndex < 0) {
+        activeIndex = 0;
+      }
+
+      if (subjects.length > 0) {
+        activeIndex = Math.min(activeIndex, subjects.length - 1);
+        updateTrafficLight();
+      }
+    } catch (error) {
+      console.error('Erro ao carregar os dados:', error);
+      subjects = [];
+      activeIndex = 0;
+    }
+
+    render();
+  }
+
+  function updateTrafficLight() {
+    subjects.forEach((subject, index) => {
+      if (index === activeIndex) {
+        subject.state = 'green';
+      } else if (index === activeIndex + 1) {
+        subject.state = 'yellow';
+      } else {
+        subject.state = 'red';
+      }
+    });
+  }
+
+  function render() {
+    grid.innerHTML = '';
+
+    if (subjects.length === 0) {
+      grid.innerHTML = `
+        <div class="empty">
+          Nenhuma matéria adicionada ainda.<br>
+          Digite acima e clique em Adicionar.
+        </div>
+      `;
+      return;
+    }
+
+    subjects.forEach((subject, index) => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'remove-btn';
+      removeBtn.textContent = '×';
+      removeBtn.title = 'Excluir matéria';
+      removeBtn.setAttribute('aria-label', 'Excluir ' + subject.name);
+
+      removeBtn.onclick = (event) => {
+        event.stopPropagation();
+
+        if (confirm(`Deseja excluir a matéria "${subject.name}"?`)) {
+          removeSubject(subject.id);
+        }
+      };
+
+      const lamp = document.createElement('button');
+      lamp.className = 'lamp-btn state-' + subject.state;
+      lamp.title = 'Clique para selecionar esta matéria';
+      lamp.setAttribute(
+        'aria-label',
+        subject.name + ': ' + STATE_LABELS[subject.state]
+      );
+
+      lamp.onclick = () => {
+        activeIndex = index;
+        updateTrafficLight();
+        saveData();
+        render();
+      };
+
+      const label = document.createElement('div');
+      label.className = 'label';
+      label.textContent = subject.name;
+
+      const tag = document.createElement('div');
+      tag.className = 'status-tag state-' + subject.state;
+      tag.textContent = STATE_LABELS[subject.state];
+
+      cell.appendChild(removeBtn);
+      cell.appendChild(lamp);
+      cell.appendChild(label);
+      cell.appendChild(tag);
+      grid.appendChild(cell);
+    });
+  }
+
+  function removeSubject(id) {
+    const removedIndex = subjects.findIndex(
+      subject => subject.id === id
+    );
+
+    subjects = subjects.filter(
+      subject => subject.id !== id
+    );
+
+    if (subjects.length === 0) {
+      activeIndex = 0;
+    } else if (removedIndex < activeIndex) {
+      activeIndex--;
+    } else if (activeIndex >= subjects.length) {
+      activeIndex = subjects.length - 1;
+    }
+
+    updateTrafficLight();
+    saveData();
+    render();
+  }
+
+  function addSubject() {
+    const name = input.value.trim();
+
+    if (!name) {
+      input.focus();
+      return;
+    }
+
+    subjects.push({
+      id: uid(),
+      name: name,
+      state: 'red'
+    });
+
+    if (subjects.length === 1) {
+      activeIndex = 0;
+    }
+
+    updateTrafficLight();
+    saveData();
+
+    input.value = '';
+    render();
+    input.focus();
+  }
+
+  addBtn.addEventListener('click', addSubject);
+
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+      addSubject();
+    }
+  });
+
+  loadData();
+</script>
+</body>
+</html>
